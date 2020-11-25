@@ -25,42 +25,38 @@ suite('Unit Tests', () => {
   });
 
   suite('Collectible class', () => {
-    test('Collectible class generates a collectible item object.', done => {
+    test('Collectible class generates a collectible item object.', () => {
       const testItem = new Collectible({ x: 100, y: 100, id: Date.now() });
 
       assert.isObject(testItem);
-      done();
     });
 
-    test('Collectible item object contains x and y coordinates and a unique id.', done => {
+    test('Collectible item object contains x and y coordinates and a unique id.', () => {
       const testItem = new Collectible({ x: 100, y: 100, id: Date.now() });
 
       assert.typeOf(testItem.x, 'Number');
       assert.typeOf(testItem.y, 'Number');
       assert.exists(testItem.id);
-      done();
     });
   });
 
   suite('Player class', () => {
-    test('Player class generates a player object.', done => {
+    test('Player class generates a player object.', () => {
       const testPlayer = new Player({ x: 100, y: 100, score: 0, id: Date.now() });
 
       assert.isObject(testPlayer);
-      done();
     });
 
-    test('Player object contains a score, x and y coordinates, and a unique id.', done => {
+    test('Player object contains a score, x and y coordinates, and a unique id.', () => {
       const testPlayer = new Player({ x: 100, y: 100, score: 0, id: Date.now() });
 
       assert.typeOf(testPlayer.x, 'Number');
       assert.typeOf(testPlayer.y, 'Number');
       assert.typeOf(testPlayer.score, 'Number');
       assert.exists(testPlayer.id);
-      done();
     });
 
-    test("movePlayer(str, num) adjusts a player's position.", done => {
+    test("movePlayer(str, num) adjusts a player's position.", () => {
       // Note: Only testing movement along the x axis in case
       // the game is a 2D platformer
       const testPlayer = new Player({ x: 100, y: 100, score: 0, id: Date.now() });
@@ -74,18 +70,16 @@ suite('Unit Tests', () => {
 
       assert.deepEqual(testPos1, expectedPos1);
       assert.deepEqual(testPos2, expectedPos2);      
-      done();
     });
 
-    test("collision(obj) returns true when a player's avatar collides with a collectible item object.", done => {
+    test("collision(obj) returns true when a player's avatar collides with a collectible item object.", () => {
       const testPlayer = new Player({ x: 100, y: 100, id: Date.now() });
       const testItem = new Collectible({ x: 100, y: 100, value: 1, id: Date.now() });
 
       assert.isTrue(testPlayer.collision(testItem));
-      done();
     });
 
-    test("calculateRank(arr) returns the player's rank string.", done => {
+    test("calculateRank(arr) returns the player's rank string.", () => {
       const testPlayer1 = new Player({ x: 100, y: 100, id: 1 });
       const testPlayer2 = new Player({ x: 150, y: 150, id: 2 });
       testPlayer1.score = 5;
@@ -95,7 +89,6 @@ suite('Unit Tests', () => {
       // Account for possible space
       assert.match(testPlayer1.calculateRank(testArr), /Rank\: 1\s?\/\s?2/);
       assert.match(testPlayer2.calculateRank(testArr), /Rank\: 2\s?\/\s?2/);
-      done();
     });
   });
 
