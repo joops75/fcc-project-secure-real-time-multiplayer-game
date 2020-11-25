@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const expect = require('chai');
 const socket = require('socket.io');
+const helmet = require('helmet');
 
 const fccTestingRoutes = require('./routes/fcctesting.js');
 const runner = require('./test-runner.js');
@@ -14,6 +15,18 @@ app.use('/assets', express.static(process.cwd() + '/assets'));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Set security headers
+app.use(helmet());
+app.use((req, res, next) => {
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('surrogate-control', 'no-store');
+  res.setHeader('cache-control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('pragma', 'no-cache');
+  res.setHeader('expires', '0');
+  res.setHeader('X-Powered-By', 'PHP 7.4.3');
+  next();
+});
 
 // Index page (static HTML)
 app.route('/')
