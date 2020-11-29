@@ -1,26 +1,9 @@
 body {
+  background-color: rgb(255, 217, 125); /* orange */
   margin: 20px;
 }
 
-code {
-  background: #d0d0d5;
-}
-
 canvas {
+  display: block;
   margin: auto;
-}
-
-#user-stories {
-  font-size: 1.3rem;
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
-}
-
-@media (min-width: 800px) {
-  .container {
-    flex-direction: row;
-  }
 }

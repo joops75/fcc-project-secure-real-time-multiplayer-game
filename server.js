@@ -1,14 +1,13 @@
 require('dotenv').config();
-const express = require('express');
+const express = require('express')
+const app = express();
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
 const bodyParser = require('body-parser');
-const expect = require('chai');
-const socket = require('socket.io');
 const helmet = require('helmet');
 
 const fccTestingRoutes = require('./routes/fcctesting.js');
 const runner = require('./test-runner.js');
-
-const app = express();
 
 app.use('/public', express.static(process.cwd() + '/public'));
 app.use('/assets', express.static(process.cwd() + '/assets'));
@@ -44,10 +43,52 @@ app.use(function(req, res, next) {
     .send('Not Found');
 });
 
+// Set up multiplayer functionality
+const players = [];
+let item = null
+
+const getPlayerIndex = (prop, value) => {
+  let index = -1;
+  for (let i = 0; i < players.length; i ++) {
+    if (players[i][prop] === value) {
+      index = i;
+    }
+  }
+  return index;
+}
+
+io.on('connection', socket => {
+  // Send socket id and item data to newly connected player
+  socket.emit('socketId', socket.id);
+  socket.emit('itemData', item);
+
+  socket.on('updatePlayer', player => {
+    const i = getPlayerIndex('id', player.id)
+    if (i === -1) {
+      players.push(player)
+    } else {
+      players[i] = player;
+    }
+    io.emit('playersData', players)
+  });
+
+  socket.on('updateItem', itm => {
+    item = itm
+    io.emit('itemData', item)
+  });
+
+  socket.on('disconnect', () => {
+    const i = getPlayerIndex('socketId', socket.id)
+    players.splice(i, 1)
+    io.emit('playersData', players)
+  });
+});
+
+// Set port number
 const portNum = process.env.PORT || 3000;
 
 // Set up server and tests
-const server = app.listen(portNum, () => {
+http.listen(portNum, () => {
   console.log(`Listening on port ${portNum}`);
   if (process.env.NODE_ENV==='test') {
     console.log('Running Tests...');
