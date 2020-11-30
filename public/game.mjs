@@ -159,6 +159,7 @@ socket.on('socketId', socketId => {
 socket.on('playersData', playersData => {
   players = playersData;
   updateCanvas();
+  keyGuard = false;
 });
 
 socket.on('itemData', itm => {
@@ -174,19 +175,24 @@ socket.on('itemData', itm => {
 window.addEventListener('keydown', e => {
   // e.preventDefault(); // prevents arrow keys from scrolling the screen
 
-  const { key } = e;
-  if (key === 'w' || key === 'ArrowUp') player.movePlayer('up', moveSize);
-  if (key === 'a' || key === 'ArrowLeft') player.movePlayer('left', moveSize);
-  if (key === 's' || key === 'ArrowDown') player.movePlayer('down', moveSize);
-  if (key === 'd' || key === 'ArrowRight') player.movePlayer('right', moveSize);
-  
-  socket.emit('updatePlayer', player);
+  if (!keyGuard) {
+    const { key } = e;
+    
+    if (key === 'w' || key === 'ArrowUp') player.movePlayer('up', moveSize);
+    if (key === 'a' || key === 'ArrowLeft') player.movePlayer('left', moveSize);
+    if (key === 's' || key === 'ArrowDown') player.movePlayer('down', moveSize);
+    if (key === 'd' || key === 'ArrowRight') player.movePlayer('right', moveSize);
+
+    keyGuard = true;
+    socket.emit('updatePlayer', player);
+  }
 });
 
 // game data
 let players = [];
 let player = null;
 let item = null;
+let keyGuard = true;
 
 // create new player object
 makePlayer();
