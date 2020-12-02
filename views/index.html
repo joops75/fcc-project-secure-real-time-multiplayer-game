@@ -2,17 +2,24 @@
 <html>
 
 <head>
-  <title>Marble Chase</title>
+  <title>Apple Chase</title>
   <meta name="description" content="An example for the fCC InfoSec Secure Real-Time Multiplayer Game project" />
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="../public/style.css" type="text/css" />
-  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <script src="/socket.io/socket.io.js"></script>
 </head>
 
 <body>
+  <!-- preload images -->
+  <div style="display:none;">
+    <img id="smileys" src="../public/images/100 smileys.png">
+    <img id="grass" src="../public/images/grass.png">
+  </div>
+  <!-- game area -->
   <div class="container">
     <canvas ref="game" id="game-window" width="640" height="480">
     </canvas>

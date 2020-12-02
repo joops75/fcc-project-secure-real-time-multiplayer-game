@@ -10,59 +10,60 @@ const width = canvas.width;
 const height = canvas.height;
 const headerHeight = 40;
 const border = 10;
-const title = 'Marble Chase';
-const titleFontSize = 30;
-const subtitleFontSize = 20;
-const titleCentreY = border + headerHeight / 2 + titleFontSize / 4;
-const subtitleCentreY = border + headerHeight / 2 + subtitleFontSize / 4;
+const gameAreaMinX = border;
+const gameAreaMaxX = width - border;
+const gameAreaMinY = headerHeight + 2 * border;;
+const gameAreaMaxY = height - border;
+const title = 'Apple Chase';
+const titleFontSize = 20;
+const subtitleFontSize = 10;
+const titleCentreY = border + (headerHeight + titleFontSize) / 2;
+const subtitleCentreY = border + (headerHeight + subtitleFontSize) / 2;
 let rankTextWidthPrev = null;
 
+// fonts
+const titleFont = titleFontSize + 'px "Press Start 2P"';
+const subtitleFont = subtitleFontSize + 'px "Press Start 2P"';
+
 // player constraints
-const avatarSize = 10;
-const playerMinX = border;
-const playerMinY = headerHeight + 2 * border;
-const playerMaxX = width - border - avatarSize;
-const playerMaxY = height - border - avatarSize;
-const moveSize = 10;
+const avatarSize = 40;
+const playerMinX = gameAreaMinX;
+const playerMinY = gameAreaMinY;
+const playerMaxX = gameAreaMaxX - avatarSize;
+const playerMaxY = gameAreaMaxY - avatarSize;
+const moveSize = 1;
+const moveRate = 5;
 
 // item constraints
-const itemSize = 5;
-const itemMinX = border;
-const itemMinY = headerHeight + 2 * border;
-const itemMaxX = width - border - itemSize;
-const itemMaxY = height - border - itemSize;
+const itemSize = 20;
+const itemMinX = gameAreaMinX;
+const itemMinY = gameAreaMinY;
+const itemMaxX = gameAreaMaxX - itemSize;
+const itemMaxY = gameAreaMaxY - itemSize;
 
 // colors
-// const lightPink = 'rgb(253, 180, 193)';
-// const palePink = 'rgb(255, 222, 218)';
-// const indigo = 'rgb(197, 194, 223)'; // lightPeriwinkle
-// const violet = 'rgb(155, 148, 190)'; // glossyGrape
-// const deepPeach = 'rgb(249, 200, 160)';
-const lightRed = 'rgb(242, 137, 151)'; // tulip
-const lightGreen = 'rgb(185, 245, 169)'; // menthol
-const lightYellow = 'rgb(248, 248, 176)'; // calamansi
-// const red = 'rgb(238, 96, 85)';
-const turquoise = 'rgb(96, 211, 148)';
-// const green = 'rgb(170, 246, 131)';
-// const orange = 'rgb(255, 217, 125)';
-// const salmon = 'rgb(255, 155, 133)';
-const blue = 'rgb(131, 188, 255)';
-const darkGrey = 'rgb(50, 50, 50)';
-const mediumGrey = 'rgb(65, 65, 65)';
-const lightGrey = 'rgb(80, 80, 80)';
+const darkGreen = 'rgb(14, 153, 60)';
+const yellow = 'rgb(255, 252, 0)';
+const green = 'rgb(0, 198, 45)';
 
-const frameColor = darkGrey;
-const headerColor = mediumGrey;
-const titleColor = lightGreen;
-const subtitleColor = lightYellow;
-const gameAreaColor = lightGrey;
-const playerColor = lightRed;
-const enemyColor = blue;
-const itemColor = turquoise;
+const frameColor = darkGreen;
+const headerColor = green;
+const titleColor = yellow;
+const subtitleColor = yellow;
 
-// fonts
-const titleFont = titleFontSize + 'px isocteur';
-const subtitleFont = subtitleFontSize + 'px geniso';
+// images
+const gameIcons = document.getElementById('smileys');
+const backgroundTile = document.getElementById('grass');
+const backgroundTileWidth = backgroundTile.width;
+const backgroundTileHeight = backgroundTile.height;
+const backgroundTileWidthPartial = (gameAreaMaxX - gameAreaMinX) % backgroundTileWidth;
+const backgroundTileHeightPartial = (gameAreaMaxY - gameAreaMinY) % backgroundTileHeight;
+
+// don't smooth images when scaled
+ctx.mozImageSmoothingEnabled = false;
+ctx.webkitImageSmoothingEnabled = false;
+ctx.msImageSmoothingEnabled = false;
+ctx.imageSmoothingEnabled = false;
 
 // fill in canvas frame
 ctx.fillStyle = frameColor;
@@ -77,6 +78,12 @@ ctx.font = titleFont;
 ctx.fillStyle = titleColor;
 ctx.textAlign = "center";
 ctx.fillText(title, width / 2, titleCentreY);
+
+// fill in controls info
+ctx.font = subtitleFont;
+ctx.fillStyle = subtitleColor;
+ctx.textAlign = "left";
+ctx.fillText("Controls: WASD", 2 * border, subtitleCentreY);
 
 // functions
 const randomCoord = (min, max) => {
@@ -103,10 +110,22 @@ const makeItem = () => {
 const updateCanvas = () => {
   // see if the player collects the item
   if (player.collision(item)) {
-    // increment score and make new item if so
+    // increment score and make new item
     player.score ++;
     makeItem();
+
+    // send item to server
     socket.emit('updateItem', item);
+
+    // change itemCollected for changing avatar when drawing
+    itemCollected = true;
+    // revert to original icon image a second after collecting an item
+    
+    clearTimeout(itemTimer);
+    itemTimer = setTimeout(() => {
+      itemCollected = false;
+      ctx.drawImage(gameIcons, 0, 0, 15, 15, player.x, player.y, avatarSize, avatarSize);
+    }, 1000);
   }
 
   // calculate width and starting point of player's ranking score info
@@ -126,27 +145,36 @@ const updateCanvas = () => {
   ctx.fillText(rankText, rankTextStartX, subtitleCentreY); // fill new text areaY
 
   // draw game area background
-  ctx.fillStyle = gameAreaColor;
-  ctx.fillRect(playerMinX, playerMinY, width - 2 * border, height - 3 * border - headerHeight);
-
-  // draw players
-  for (let i = 0; i < players.length; i ++) {
-    const p = players[i];
-    if (p.id === player.id) {
-      ctx.fillStyle = playerColor;
-      ctx.fillRect(p.x, p.y, avatarSize, avatarSize);
-    } else {
-      ctx.fillStyle = enemyColor;
-      ctx.fillRect(p.x, p.y, avatarSize, avatarSize);
+  for (let i = 0; i < height; i += backgroundTileHeight) {
+    for (let j = 0; j < width; j +=backgroundTileWidth) {
+      const iFit = i + backgroundTileHeight <= gameAreaMaxY;
+      const jFit = j + backgroundTileWidth <= gameAreaMaxX;
+      if (iFit && jFit) {
+        ctx.drawImage(backgroundTile, j + gameAreaMinX, i + gameAreaMinY, backgroundTileWidth, backgroundTileHeight);
+      } else if (iFit) {
+        ctx.drawImage(backgroundTile, 0, 0, backgroundTileWidthPartial, backgroundTileHeight, j + gameAreaMinX, i + gameAreaMinY, backgroundTileWidthPartial, backgroundTileHeight);
+      } else if (jFit) {
+        ctx.drawImage(backgroundTile, 0, 0, backgroundTileWidth, backgroundTileHeightPartial, j + gameAreaMinX, i + gameAreaMinY, backgroundTileWidth, backgroundTileHeightPartial);
+      } else {
+        ctx.drawImage(backgroundTile, 0, 0, backgroundTileWidthPartial, backgroundTileHeightPartial, j + gameAreaMinX, i + gameAreaMinY, backgroundTileWidthPartial, backgroundTileHeightPartial);
+      }
     }
   }
 
   // draw item
   if (item) {
-    ctx.fillStyle = itemColor;
-    ctx.beginPath();
-    ctx.arc(item.x + itemSize / 2, item.y + itemSize / 2, itemSize / 2, 0, 2 * Math.PI);
-    ctx.fill(); 
+    ctx.drawImage(gameIcons, 6*15, 9*15, 15, 15, item.x, item.y, itemSize, itemSize);
+  }
+
+  // draw players
+  for (let i = 0; i < players.length; i ++) {
+    const p = players[i];
+    if (p.id === player.id) {
+      if (itemCollected) ctx.drawImage(gameIcons, 2*15, 0, 15, 15, p.x, p.y, avatarSize, avatarSize);
+      else ctx.drawImage(gameIcons, 0, 0, 15, 15, p.x, p.y, avatarSize, avatarSize);
+    } else {
+      ctx.drawImage(gameIcons, 8*15, 2*15, 15, 15, p.x, p.y, avatarSize, avatarSize);
+    }
   }
 }
 
@@ -159,7 +187,6 @@ socket.on('socketId', socketId => {
 socket.on('playersData', playersData => {
   players = playersData;
   updateCanvas();
-  keyGuard = false;
 });
 
 socket.on('itemData', itm => {
@@ -175,16 +202,39 @@ socket.on('itemData', itm => {
 window.addEventListener('keydown', e => {
   // e.preventDefault(); // prevents arrow keys from scrolling the screen
 
-  if (!keyGuard) {
-    const { key } = e;
-    
-    if (key === 'w' || key === 'ArrowUp') player.movePlayer('up', moveSize);
-    if (key === 'a' || key === 'ArrowLeft') player.movePlayer('left', moveSize);
-    if (key === 's' || key === 'ArrowDown') player.movePlayer('down', moveSize);
-    if (key === 'd' || key === 'ArrowRight') player.movePlayer('right', moveSize);
+  const { key } = e;
+  if (key === 'w' || key === 'ArrowUp') keys.up = true;
+  if (key === 'a' || key === 'ArrowLeft') keys.left = true;
+  if (key === 's' || key === 'ArrowDown') keys.down = true;
+  if (key === 'd' || key === 'ArrowRight') keys.right = true;
 
-    keyGuard = true;
-    socket.emit('updatePlayer', player);
+  if (!moveTimer) moveTimer = setInterval(() => {
+    let dir = '';
+    const dirY = keys.down - keys.up;
+    const dirX = keys.right - keys.left;
+
+    if      (dirY < 0) dir += 'up';
+    else if (dirY > 0) dir += 'down';
+    if      (dirX < 0) dir += 'left';
+    else if (dirX > 0) dir += 'right';
+    
+    if (dir) {
+      player.movePlayer(dir, moveSize);
+      socket.emit('updatePlayer', player);
+    }
+  }, moveRate);
+});
+
+window.addEventListener('keyup', e => {
+  const { key } = e;
+  if (key === 'w' || key === 'ArrowUp') keys.up = false;
+  if (key === 'a' || key === 'ArrowLeft') keys.left = false;
+  if (key === 's' || key === 'ArrowDown') keys.down = false;
+  if (key === 'd' || key === 'ArrowRight') keys.right = false;
+
+  if (!keys.up && !keys.left && !keys.right && !keys.down) {
+    clearInterval(moveTimer);
+    moveTimer = null;
   }
 });
 
@@ -192,7 +242,10 @@ window.addEventListener('keydown', e => {
 let players = [];
 let player = null;
 let item = null;
-let keyGuard = true;
+const keys = { up: false, left: false, right: false, down: false };
+let moveTimer = null;
+let itemCollected = false;
+let itemTimer = null;
 
 // create new player object
 makePlayer();

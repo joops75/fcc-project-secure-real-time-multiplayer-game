@@ -1,0 +1,2 @@
+grass background: https://opengameart.org/content/map-tile
+player icons and item: https://opengameart.org/content/100-smiley-faces

@@ -18,21 +18,46 @@ class Player {
   movePlayer(dir, speed) {
     switch (dir) {
       case 'up':
-        if (this.y - speed >= this.playerMinY) this.y -= speed;
+        this.y -= speed;
         break;
         
       case 'down':
-        if (this.y + speed <= this.playerMaxY) this.y += speed;
+        this.y += speed;
         break;
         
       case 'left':
-        if (this.x - speed >= this.playerMinX) this.x -= speed;
+        this.x -= speed;
         break;
         
       case 'right':
-        if (this.x + speed <= this.playerMaxX) this.x += speed;
+        this.x += speed;
+        break;
+
+      case 'upleft':
+        this.y -= speed;
+        this.x -= speed;
+        break;
+
+      case 'upright':
+        this.y -= speed;
+        this.x += speed;
+        break;
+
+      case 'downleft':
+        this.y += speed;
+        this.x -= speed;
+        break;
+
+      case 'downright':
+        this.y += speed;
+        this.x += speed;
         break;
     }
+
+    if      (this.y < this.playerMinY) this.y = this.playerMinY;
+    else if (this.y > this.playerMaxY) this.y = this.playerMaxY;
+    if      (this.x < this.playerMinX) this.x = this.playerMinX;
+    else if (this.x > this.playerMaxX) this.x = this.playerMaxX;
   }
 
   collision(item) {
