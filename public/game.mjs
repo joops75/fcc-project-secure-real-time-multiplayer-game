@@ -65,26 +65,6 @@ ctx.webkitImageSmoothingEnabled = false;
 ctx.msImageSmoothingEnabled = false;
 ctx.imageSmoothingEnabled = false;
 
-// fill in canvas frame
-ctx.fillStyle = frameColor;
-ctx.fillRect(0, 0, width, height);
-
-// fill in canvas header
-ctx.fillStyle = headerColor;
-ctx.fillRect(border, border, width - 2 * border, headerHeight);
-
-// fill in canvas title
-ctx.font = titleFont;
-ctx.fillStyle = titleColor;
-ctx.textAlign = "center";
-ctx.fillText(title, width / 2, titleCentreY);
-
-// fill in controls info
-ctx.font = subtitleFont;
-ctx.fillStyle = subtitleColor;
-ctx.textAlign = "left";
-ctx.fillText("Controls: WASD", 2 * border, subtitleCentreY);
-
 // functions
 const randomCoord = (min, max) => {
   return Math.floor((Math.round(Math.random() * (max - min)) + min) / moveSize) * moveSize;
@@ -108,6 +88,26 @@ const makeItem = () => {
 }
 
 const updateCanvas = () => {
+  // fill in canvas frame
+  ctx.fillStyle = frameColor;
+  ctx.fillRect(0, 0, width, height);
+  
+  // fill in canvas header
+  ctx.fillStyle = headerColor;
+  ctx.fillRect(border, border, width - 2 * border, headerHeight);
+  
+  // fill in canvas title
+  ctx.font = titleFont;
+  ctx.fillStyle = titleColor;
+  ctx.textAlign = "center";
+  ctx.fillText(title, width / 2, titleCentreY);
+  
+  // fill in controls info
+  ctx.font = subtitleFont;
+  ctx.fillStyle = subtitleColor;
+  ctx.textAlign = "left";
+  ctx.fillText("Controls: WASD", 2 * border, subtitleCentreY);
+
   // see if the player collects the item
   if (player.collision(item)) {
     // increment score and make new item
@@ -180,6 +180,7 @@ const updateCanvas = () => {
 
 // listeners
 socket.on('socketId', socketId => {
+  makePlayer();
   player.socketId = socketId;
   socket.emit('updatePlayer', player);
 });
@@ -247,5 +248,4 @@ let moveTimer = null;
 let itemCollected = false;
 let itemTimer = null;
 
-// create new player object
-makePlayer();
+updateCanvas();
