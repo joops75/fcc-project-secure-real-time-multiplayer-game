@@ -108,6 +108,8 @@ const updateCanvas = () => {
   ctx.textAlign = "left";
   ctx.fillText("Controls: WASD", 2 * border, subtitleCentreY);
 
+  if (!player) return;
+  
   // see if the player collects the item
   if (player.collision(item)) {
     // increment score and make new item
@@ -221,6 +223,7 @@ window.addEventListener('keydown', e => {
     
     if (dir) {
       player.movePlayer(dir, moveSize);
+      updateCanvas();
       socket.emit('updatePlayer', player);
     }
   }, moveRate);
