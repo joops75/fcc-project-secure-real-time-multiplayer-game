@@ -12,8 +12,10 @@ const headerHeight = 40;
 const border = 10;
 const gameAreaMinX = border;
 const gameAreaMaxX = width - border;
-const gameAreaMinY = headerHeight + 2 * border;;
+const gameAreaMinY = headerHeight + 2 * border;
 const gameAreaMaxY = height - border;
+const innerWidth = gameAreaMaxX - gameAreaMinX;
+const innerHeight = gameAreaMaxY - gameAreaMinY;
 const title = 'Apple Chase';
 const titleFontSize = 20;
 const subtitleFontSize = 10;
@@ -56,8 +58,8 @@ const gameIcons = document.getElementById('smileys');
 const backgroundTile = document.getElementById('grass');
 const backgroundTileWidth = backgroundTile.width;
 const backgroundTileHeight = backgroundTile.height;
-const backgroundTileWidthPartial = (gameAreaMaxX - gameAreaMinX) % backgroundTileWidth;
-const backgroundTileHeightPartial = (gameAreaMaxY - gameAreaMinY) % backgroundTileHeight;
+const backgroundTileWidthPartial = innerWidth % backgroundTileWidth;
+const backgroundTileHeightPartial = innerHeight % backgroundTileHeight;
 
 // don't smooth images when scaled
 ctx.mozImageSmoothingEnabled = false;
@@ -147,10 +149,10 @@ const updateCanvas = () => {
   ctx.fillText(rankText, rankTextStartX, subtitleCentreY); // fill new text areaY
 
   // draw game area background
-  for (let i = 0; i < height; i += backgroundTileHeight) {
-    for (let j = 0; j < width; j +=backgroundTileWidth) {
-      const iFit = i + backgroundTileHeight <= gameAreaMaxY;
-      const jFit = j + backgroundTileWidth <= gameAreaMaxX;
+  for (let i = 0; i < innerHeight; i += backgroundTileHeight) {
+    for (let j = 0; j < innerWidth; j += backgroundTileWidth) {
+      const iFit = i + backgroundTileHeight <= innerHeight;
+      const jFit = j + backgroundTileWidth <= innerWidth;
       if (iFit && jFit) {
         ctx.drawImage(backgroundTile, j + gameAreaMinX, i + gameAreaMinY, backgroundTileWidth, backgroundTileHeight);
       } else if (iFit) {
